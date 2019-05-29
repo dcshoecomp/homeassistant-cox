@@ -1,3 +1,11 @@
-https://www.c o x .com/internet/ajaxDataUsageJSON.ajax?usagePeriodType=daily
+https://www.c^o^x .com/internet/ajaxDataUsageJSON.ajax?usagePeriodType=daily
 
-https://www.c o x.com/resaccount/ajaxModemReset.ajax?option=hit
+https://www.c^o^x.com/resaccount/ajaxModemReset.ajax?option=hit
+
+https://idm.east.c^o^x.net/idm/c^o^xnetlogin
+name="onsuccess" value="https://www.c^o^x.com/resaccount/home.c^o^x"
+name="emaildomain" value="@c^o^x.net"
+name="targetFN" value="C^O^X.net"
+name="username"
+name="password"
+name="rememberme"
