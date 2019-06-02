@@ -3,6 +3,7 @@ import logging
 from datetime import timedelta
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from homeassistant.util import Throttle
 
 
 REQUIREMENTS = ['requests']
@@ -29,6 +30,7 @@ class cox_sensor(Entity):
         self._password = password
         self.update()
 
+    @Throttle(SCAN_INTERVAL)
     def update(self):
         import requests
         try:
