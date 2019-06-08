@@ -1,6 +1,7 @@
 import logging
 
 from datetime import timedelta
+from datetime import datetime
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.util import Throttle
@@ -19,19 +20,18 @@ _LOGGER = logging.getLogger(__name__)
 
 SCAN_INTERVAL = timedelta(hours=6)
 
-def setup_platform(hass, config, add_devices, discovery_info=None):
+def setup_platform(hass, config, add_entities, discovery_info=None):
     username = str(config.get(CONF_USERNAME))
     password = str(config.get(CONF_PASSWORD))
-    add_devices([cox_sensor(username, password)])
+    add_entities([cox_sensor(username, password, SCAN_INTERVAL)], True)
 
 class cox_sensor(Entity):
-    def __init__(self, username, password):
+    def __init__(self, username, password, interval):
         self._username = username
         self._password = password
-        self.update()
+        self.update = Throttle(interval)(self._update)
 
-    @Throttle(SCAN_INTERVAL)
-    def update(self):
+    def _update(self):
         import requests
         try:
             data= {
@@ -50,6 +50,7 @@ class cox_sensor(Entity):
             currentusage=(datausage.json())['modemDetails'][0]['dataUsed']['totalDataUsed'].replace("&#160;"," ")
             self._state = currentusage
             self._attributes = {}
+            self._attributes['last_update'] = datetime.now()
         except Exception as err:
             _LOGGER.error(err)
 
@@ -75,5 +76,5 @@ class cox_sensor(Entity):
     @property
     def should_poll(self):
         """Return the polling requirement for this sensor."""
-        return False
+        return True
 

@@ -4,6 +4,6 @@
     "documentation": "https://github.com/dcshoecomp/undocumented-cox-api",
     "dependencies": [],
     "codeowners": [],
-    "requirements": []
+    "requirements": ["requests"]
   }
   
