@@ -11,3 +11,4 @@ sensor:
 key	description<br>
 states: sensor will return the total current usage
 
+It is currently set to only check every 6 hours. 
