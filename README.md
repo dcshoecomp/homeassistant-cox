@@ -2,8 +2,8 @@ To add cox_sensor to your installation, download the latest release zip and copy
 
 Example configuration.yaml entry
 
-sensor:
 ```yaml
+sensor:
 - platform: cox_sensor<br>
   username: YOUR_USERNAME<br>
   password: YOUR_PASSWORD
