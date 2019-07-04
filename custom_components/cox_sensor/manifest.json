@@ -1,0 +1,9 @@
+{
+    "domain": "cox_sensor",
+    "name": "Cox Sensor",
+    "documentation": "https://github.com/dcshoecomp/homeassistant-cox",
+    "dependencies": [],
+    "codeowners": [],
+    "requirements": ["requests"]
+  }
+  
