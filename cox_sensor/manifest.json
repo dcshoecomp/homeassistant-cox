@@ -1,9 +1,0 @@
-{
-    "domain": "cox_sensor",
-    "name": "Cox Sensor",
-    "documentation": "https://github.com/dcshoecomp/undocumented-cox-api",
-    "dependencies": [],
-    "codeowners": [],
-    "requirements": ["requests"]
-  }
-  
