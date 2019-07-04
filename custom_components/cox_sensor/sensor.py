@@ -55,23 +55,23 @@ class cox_sensor(Entity):
             r.get("https://www.cox.com/internet/mydatausage.cox")
             datausage = r.get("https://www.cox.com/internet/ajaxDataUsageJSON.ajax", verify=False)
 			
-			#Total Data Used in GB example: 500 GB
+            #Total Data Used in GB example: 500 GB
             if self._getattribute=="totalDataUsed":
               currentusage = (datausage.json())['modemDetails'][0]['dataUsed']['totalDataUsed'].replace("&#160;"," ")
 			
-			#Total Percent Used in % example: 50
+            #Total Percent Used in % example: 50
             if self._getattribute=="actualPercentage":
               currentusage = (datausage.json())['modemDetails'][0]['dataUsed']['renderPercentage']
 			
-			#Current Plan example: Cox High Speed Internet - Preferred150 Package
+            #Current Plan example: Cox High Speed Internet - Preferred150 Package
             if self._getattribute=="services":
               currentusage = (datausage.json())['modemDetails'][0]['services'].replace("&#160;"," ")
 			
-			#Total Data amount to be used example: 1024 GB
+            #Total Data amount to be used example: 1024 GB
             if self._getattribute=="dataPlan":
               currentusage = (datausage.json())['modemDetails'][0]['dataPlan'].replace("&#160;"," ")
 			
-			#Service Period example: 06/25/19-07/24/19
+            #Service Period example: 06/25/19-07/24/19
             if self._getattribute=="servicePeriod":
               currentusage = (datausage.json())['modemDetails'][0]['servicePeriod']
 						
