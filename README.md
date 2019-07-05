@@ -8,7 +8,16 @@ sensor:
   username: YOUR_USERNAME<br>
   password: YOUR_PASSWORD
 ```
-key	description<br>
-states: sensor will return the total current usage
 
-It is currently set to only check every 6 hours. 
+states: <br>
+data_used sensor will return the total current usage<br>
+remaining_days sensor will return the number of days left in your service plan<br>
+percentage_used sensor will return % used of total data<br>
+
+Attributes:<br>
+last_update: When cox updated your account usage<br>
+data_plan: data allowance<br>
+service_end: when your service plan ends<br>
+service: Friendly name of your service plan<br>
+
+It is currently set to check every 6 hours. 
