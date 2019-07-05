@@ -23,11 +23,9 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     username = str(config.get(CONF_USERNAME))
     password = str(config.get(CONF_PASSWORD))
     add_entities([
-	  cox_sensor(username=username, password=password, getattribute="totalDataUsed", interval=SCAN_INTERVAL),
-	  cox_sensor(username=username, password=password, getattribute="actualPercentage", interval=SCAN_INTERVAL),  
-	  cox_sensor(username=username, password=password, getattribute="services", interval=SCAN_INTERVAL),
-	  cox_sensor(username=username, password=password, getattribute="dataPlan", interval=SCAN_INTERVAL),
-	  cox_sensor(username=username, password=password, getattribute="servicePeriod", interval=SCAN_INTERVAL) 
+	  cox_sensor(username=username, password=password, getattribute="data_used", interval=SCAN_INTERVAL),
+	  cox_sensor(username=username, password=password, getattribute="percentage_used", interval=SCAN_INTERVAL),  
+	  cox_sensor(username=username, password=password, getattribute="remaining_days", interval=SCAN_INTERVAL),  
 	], True) 
 
 
@@ -54,30 +52,33 @@ class cox_sensor(Entity):
             r.post(url, data=data, verify=False)
             r.get("https://www.cox.com/internet/mydatausage.cox")
             datausage = r.get("https://www.cox.com/internet/ajaxDataUsageJSON.ajax", verify=False)
-			
-            #Total Data Used in GB example: 500 GB
-            if self._getattribute=="totalDataUsed":
-              currentusage = (datausage.json())['modemDetails'][0]['dataUsed']['totalDataUsed'].replace("&#160;"," ")
-			
-            #Total Percent Used in % example: 50
-            if self._getattribute=="actualPercentage":
-              currentusage = (datausage.json())['modemDetails'][0]['dataUsed']['renderPercentage']
-			
-            #Current Plan example: Cox High Speed Internet - Preferred150 Package
-            if self._getattribute=="services":
-              currentusage = (datausage.json())['modemDetails'][0]['services'].replace("&#160;"," ")
-			
+            datausagejson = datausage.json()
+            #date that cox last updated account usage
+            lastupdatedbycox = datausagejson['modemDetails'][0]['lastUpdatedDate']
             #Total Data amount to be used example: 1024 GB
-            if self._getattribute=="dataPlan":
-              currentusage = (datausage.json())['modemDetails'][0]['dataPlan'].replace("&#160;"," ")
-			
-            #Service Period example: 06/25/19-07/24/19
-            if self._getattribute=="servicePeriod":
-              currentusage = (datausage.json())['modemDetails'][0]['servicePeriod']
-						
-            self._state = currentusage
+            dataplan = datausagejson['modemDetails'][0]['dataPlan'].replace("&#160;"," ")
+            #remaining days in service plan
+            #Current Plan example: Cox High Speed Internet - Preferred150 Package
+            services = datausagejson['modemDetails'][0]['services'].replace("&#160;"," ")
+
+            #Total Data Used in GB example: 500 GB
+            if self._getattribute=="data_used":
+              _state = datausagejson['modemDetails'][0]['dataUsed']['totalDataUsed'].replace("&#160;"," ")
+            #Total Percent Used in % example: 50
+            if self._getattribute=="remaining_days":
+                serviceperiod = datausagejson['modemDetails'][0]['servicePeriod'].split('-')
+                serviceend = datetime.strptime(serviceperiod[1], '%m/%d/%y')
+                _state = abs((datetime.today() - serviceend).days)
+            if self._getattribute=="percentage_used":
+              _state = datausagejson['modemDetails'][0]['dataUsed']['renderPercentage']
+            
+            self._state = _state
             self._attributes = {}
-            self._attributes['last_update'] = datetime.now()
+            self._attributes['last_update'] = lastupdatedbycox
+            self._attributes['data_plan'] = dataplan
+            self._attributes['service_end'] = serviceend.strftime('%m/%d/%y')
+            self._attributes['service']= services
+
         except Exception as err:
             _LOGGER.error(err)
 
@@ -104,4 +105,3 @@ class cox_sensor(Entity):
     def should_poll(self):
         """Return the polling requirement for this sensor."""
         return True
-
