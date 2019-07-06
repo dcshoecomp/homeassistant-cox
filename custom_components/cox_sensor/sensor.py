@@ -59,19 +59,20 @@ class cox_sensor(Entity):
             dataplan = datausagejson['modemDetails'][0]['dataPlan'].replace("&#160;"," ")
             #Current Plan example: Cox High Speed Internet - Preferred150 Package
             services = datausagejson['modemDetails'][0]['services'].replace("&#160;"," ")
+            #service_end attribute, returns month/day/year 
+            serviceperiod = datausagejson['modemDetails'][0]['servicePeriod'].split('-')
+            serviceend = datetime.strptime(serviceperiod[1], '%m/%d/%y')
 
             #Total Data Used in GB example: 500 GB
             if self._getattribute=="data_used":
               _state = datausagejson['modemDetails'][0]['dataUsed']['totalDataUsed'].replace("&#160;"," ")
             #remaining days in service plan
             if self._getattribute=="remaining_days":
-                serviceperiod = datausagejson['modemDetails'][0]['servicePeriod'].split('-')
-                serviceend = datetime.strptime(serviceperiod[1], '%m/%d/%y')
                 _state = abs((datetime.today() - serviceend).days)
             #Total Percent Used in % example: 50
             if self._getattribute=="percentage_used":
               _state = datausagejson['modemDetails'][0]['dataUsed']['renderPercentage']
-            
+
             self._state = _state
             self._attributes = {}
             self._attributes['last_update'] = lastupdatedbycox
