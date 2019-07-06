@@ -1,6 +1,7 @@
 Version | Changes
 :--- | :---
-v0.0.2 | added more sensors and attributes
+v0.0.3 | fixed service_end variable calls in if statement
+<strike>v0.0.2</strike> | added more sensors and attributes
 v0.0.1 | initial commit
 
 # cox_sensor
