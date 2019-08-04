@@ -1,5 +1,6 @@
 Version | Changes
 :--- | :---
+v0.0.4 | added expected_usage sensor
 v0.0.3 | fixed service_end variable calls in if statement
 <strike>v0.0.2</strike> | added more sensors and attributes
 v0.0.1 | initial commit
@@ -29,7 +30,7 @@ sensor state | description
 data_used sensor | returns the total byte usage
 remaining_days sensor | returns the number of days left in your service plan
 percentage_used sensor | returns % used of total data
-
+expected_usage | returns the % of data you are expected to use to hit 100% on service_end
 
 attribute | description  
 :--- | :---  
