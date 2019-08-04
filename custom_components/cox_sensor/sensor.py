@@ -6,7 +6,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.util import Throttle
 import requests
 
-__version_ = '0.0.5'
+__version_ = '0.0.6'
 
 REQUIREMENTS = ['requests']
 
