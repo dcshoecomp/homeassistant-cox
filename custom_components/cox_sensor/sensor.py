@@ -6,7 +6,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.util import Throttle
 import requests
 
-__version_ = '0.0.4'
+__version_ = '0.0.5'
 
 REQUIREMENTS = ['requests']
 
@@ -75,15 +75,14 @@ class cox_sensor(Entity):
             if self._getattribute=="percentage_used":
                 _state = datausagejson['modemDetails'][0]['dataUsed']['renderPercentage']
             if self._getattribute=="expected_usage":
-                serviceend = datetime.strptime('8/25/19', '%m/%d/%y') #testing
-                lastupdatedbycox = datetime.strptime('08/02/19', '%m/%d/%y') #testing
+                #serviceend = datetime.strptime('8/25/19', '%m/%d/%y') #testing
+                #lastupdatedbycox = datetime.strptime('08/02/19', '%m/%d/%y') #testing
                 if serviceend.month==1:
                     totaldays = (serviceend-serviceend.replace(month=12,year=serviceend.year-1)).days
                 else:
                     totaldays = (serviceend-serviceend.replace(month=serviceend.month-1)).days
-                #_state = datausagejson['modemDetails'][0]['dataUsed']['actualPercentage']
                 _state = round((100/totaldays)*float(totaldays-((serviceend - lastupdatedbycox).days)), 2)
-                #_state = round((100/float(13))*float(totaldays-((serviceend - lastupdatedbycox).days)), 2)
+                #_state = round((100/float(13))*float(totaldays-((serviceend - lastupdatedbycox).days)), 2) #testing
             self._state = _state
             self._attributes = {}
             self._attributes['last_update'] = lastupdatedbycox.strftime('%m/%d/%y')
