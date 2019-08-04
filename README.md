@@ -1,6 +1,6 @@
 Version | Changes
 :--- | :---
- v0.0.5 | fixed expected_usage sensor
+ v0.0.6 | fixed expected_usage sensor
 <strike>v0.0.4</strike> | added expected_usage sensor
 v0.0.3 | fixed service_end variable calls in if statement
 <strike>v0.0.2</strike> | added more sensors and attributes
