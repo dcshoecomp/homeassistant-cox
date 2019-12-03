@@ -2,19 +2,19 @@ Version | Changes
 :--- | :---
  v0.0.6 | fixed expected_usage sensor
 <strike>v0.0.4</strike> | added expected_usage sensor
-v0.0.3 | fixed service_end variable calls in if statement
+<strike>v0.0.3</strike> | fixed service_end variable calls in if statement
 <strike>v0.0.2</strike> | added more sensors and attributes
-v0.0.1 | initial commit
+<strike>v0.0.1</strike> | initial commit
 
 # cox_sensor
 
-To add cox_sensor to your installation, download the latest release zip and copy noaa_alerts folder to `<config directory>/custom_components/` and add the following to your configuration.yaml file:
+To add cox_sensor to your installation, download the latest release zip and copy cox_sensor folder to `<config directory>/custom_components/` and add the following to your configuration.yaml file:
 
 **Example configuration.yaml entry**
 ```yaml
 sensor:
-- platform: cox_sensor<br>
-  username: YOUR_USERNAME<br>
+- platform: cox_sensor
+  username: YOUR_USERNAME
   password: YOUR_PASSWORD
 ```
 **Configuration variables:**  
