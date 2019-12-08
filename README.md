@@ -4,18 +4,14 @@ Contains a sensor and a switch. The sensor returns relevant information about co
  
 # Changes
 
-Sensor Version | Changes
+Version | Changes
 :--- | :---
- v0.0.6 | fixed expected_usage sensor
+ v0.1.0 | No changes to sensor v0.0.6, addition of modem reboot switch v0.0.1
+ <strike>v0.0.6</strike> | fixed expected_usage sensor
 <strike>v0.0.4</strike> | added expected_usage sensor
 <strike>v0.0.3</strike> | fixed service_end variable calls in if statement
 <strike>v0.0.2</strike> | added more sensors and attributes
 <strike>v0.0.1</strike> | initial commit
-
-Switch Version | Changes
-:--- | :---
- v0.0.1 | Initial commit of reboot switch
-
 
 # cox_sensor
 
