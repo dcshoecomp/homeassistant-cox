@@ -28,7 +28,7 @@ SCAN_INTERVAL = timedelta(minutes=5)
 # Name, onoffFunction, Checkfunction, checkNode
 SWITCH_TYPES = {
     'reboot': [
-        'Reboot Router', 'reboot',
+        'Reboot Modem', 'reboot',
         '', ''],
 }
 
