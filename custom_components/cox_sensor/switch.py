@@ -1,25 +1,32 @@
-"""
-"""
 import logging
 import requests
-
+import json
 import voluptuous as vol
 from datetime import timedelta
 
-from homeassistant.components.switch import SwitchDevice, PLATFORM_SCHEMA
+from homeassistant.components.switch import SwitchEntity, PLATFORM_SCHEMA
 from homeassistant.const import (
     CONF_USERNAME, CONF_PASSWORD, CONF_RESOURCES, CONF_SCAN_INTERVAL
     )
 import homeassistant.helpers.config_validation as cv
 
-VERSION = '0.0.1'
+VERSION = '0.1.1'
 REQUIREMENTS = ['requests']
 _LOGGER = logging.getLogger(__name__)
 
 CONF_USERNAME="username"
 CONF_PASSWORD="password"
 
-url="https://idm.east.cox.net/idm/coxnetlogin"
+SCOPE = "openid%20internal" #okta-login.js from cox login page
+HOST_NAME = "www.cox.com" #okta-login.js
+REDIRECT_URI = "https://"+ HOST_NAME +"/authres/code" #okta-login.js
+AJAX_URL = "https://"+ HOST_NAME +"/authres/getNonce?onsuccess=" #okta-login.js
+BASE_URL = 'https://cci-res.okta.com/' #okta-login.js
+CLIENT_ID = '0oa1iranfsovqR6MG0h8' #okta-login.js
+ISSUER = 'https://cci-res.okta.com/oauth2/aus1iraniwjGQcoad0h8' #okta-login.js
+ON_SUCCESS_URL = "https%3A%2F%2Fwww.cox.com%2Fresaccount%2Fhome.html" #okta-login.js
+onSuccessUrl = ON_SUCCESS_URL
+nonceURL="https://www.cox.com/authres/getNonce?onsuccess=https%3A%2F%2Fwww.cox.com%2Fresimyaccount%2Fhome.html"
 
 DEFAULT_PREFIX = 'cox'
 
@@ -43,25 +50,23 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 
 
 def setup_platform(hass, config, add_entities_callback, discovery_info=None):
-    """Set up the netgear_enhanced switches."""
-    username = config[CONF_USERNAME]
-    password = config[CONF_PASSWORD]
+    """Set up the cox switches."""
+    username = str(config.get(CONF_USERNAME))
+    password = str(config.get(CONF_PASSWORD))
     scan_interval = config.get(CONF_SCAN_INTERVAL, SCAN_INTERVAL)
-    resources = config[CONF_RESOURCES]
+    resources = config.get(CONF_RESOURCES)
 
     _LOGGER.debug("Cox: Setup Switches")
 
-    args = [password, username]
+    args = [username, password]
     switches = []
     for kind in resources:
-        switches.append(CoxSwitch(
-            args, kind, scan_interval)
-        )
+        switches.append(CoxSwitch(args, kind, scan_interval))
 
     add_entities_callback(switches)
 
 
-class CoxSwitch(SwitchDevice):
+class CoxSwitch(SwitchEntity):
     """Representation of a netgear enhanced switch."""
 
     def __init__(self, args, kind, scan_interval):
@@ -69,8 +74,8 @@ class CoxSwitch(SwitchDevice):
         self._name = SWITCH_TYPES[kind][0]
         self.entity_id = f"switch.{DEFAULT_PREFIX}_{kind}"
         self._nfFunction = SWITCH_TYPES[kind][1]
-        self._username = SWITCH_TYPES[kind][1]
-        self._password = SWITCH_TYPES[kind][0]
+        self._username = args[0]
+        self._password = args[1]
         self._is_on = None
         self._icon = None
         self._scan_interval = scan_interval
@@ -106,20 +111,28 @@ class CoxSwitch(SwitchDevice):
         _LOGGER.debug("Cox Switch: Turning on %s", self._name)
         if self._nfFunction in ('reboot'):
             try:
-                data= {
-                'username': self._username,
-                'password': self._password,
-                'rememberme': 'true',
-                'emaildomain': '@cox.net',
-                'targetFN': 'COX.net',
-                'onsuccess': 'https://www.cox.com/resaccount/home.cox',
-                'post': 'Submit'
+                data = {
+                "username": self._username,
+                "password": self._password,
+                "options": {
+                    "multiOptionalFactorEnroll": False,
+                    "warnBeforePasswordExpired": False
+                }
+                }
+                headers = {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
                 }
                 r = requests.Session()
-                r.post(url, data=data, verify=False)
+                nonceVal=r.get(AJAX_URL + ON_SUCCESS_URL).text
+                oktasession=r.post(BASE_URL + "/api/v1/authn", data=json.dumps(data), headers=headers, verify=False)
+                sessionToken=oktasession.json()['sessionToken']
+                url= ISSUER + '/v1/authorize?client_id=' + CLIENT_ID + '&nonce=' + nonceVal + '&redirect_uri=' + REDIRECT_URI + '&response_mode=query&response_type=code&sessionToken=' + sessionToken + '&state=https%253A%252F%252Fwww.cox.com%252Fwebapi%252Fcdncache%252Fcookieset%253Fresource%253Dhttps%253A%252F%252Fwww.cox.com%252Fresaccount%252Fhome.cox&scope=' + SCOPE
+                oktasignin=r.get(url,allow_redirects=True, verify=False)
                 r.get("https://www.cox.com/resaccount/refresh-modem.cox")
                 r.get("https://www.cox.com/resaccount/refresh-modem.cox/ajaxModemReset.ajax?option=hit", verify=False)
             except Exception as err:
+                _LOGGER.debug(oktasession.text)
                 _LOGGER.error(err)
 
         self._is_on = True

@@ -5,8 +5,9 @@ from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.util import Throttle
 import requests
+import json
 
-__version_ = '0.0.6'
+__version_ = '0.1.1'
 
 REQUIREMENTS = ['requests']
 
@@ -15,7 +16,16 @@ CONF_PASSWORD="password"
 
 ICON = 'mdi:cloud-braces'
 
-url="https://idm.east.cox.net/idm/coxnetlogin"
+SCOPE = "openid%20internal" #okta-login.js from cox login page
+HOST_NAME = "www.cox.com" #okta-login.js
+REDIRECT_URI = "https://"+ HOST_NAME +"/authres/code" #okta-login.js
+AJAX_URL = "https://"+ HOST_NAME +"/authres/getNonce?onsuccess=" #okta-login.js
+BASE_URL = 'https://cci-res.okta.com/' #okta-login.js
+CLIENT_ID = '0oa1iranfsovqR6MG0h8' #okta-login.js
+ISSUER = 'https://cci-res.okta.com/oauth2/aus1iraniwjGQcoad0h8' #okta-login.js
+ON_SUCCESS_URL = "https%3A%2F%2Fwww.cox.com%2Fresaccount%2Fhome.html" #okta-login.js
+onSuccessUrl = ON_SUCCESS_URL
+nonceURL="https://www.cox.com/authres/getNonce?onsuccess=https%3A%2F%2Fwww.cox.com%2Fresimyaccount%2Fhome.html"
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -41,18 +51,25 @@ class cox_sensor(Entity):
 
     def _update(self):
         try:
-            data= {
-            'username': self._username,
-            'password': self._password,
-            'rememberme': 'true',
-            'emaildomain': '@cox.net',
-            'targetFN': 'COX.net',
-            'onsuccess': 'https://www.cox.com/resaccount/home.cox',
-            'post': 'Submit'
+            data = {
+            "username": self._username,
+            "password": self._password,
+            "options": {
+                "multiOptionalFactorEnroll": False,
+                "warnBeforePasswordExpired": False
+            }
+            }
+            headers = {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
             }
             r = requests.Session()
-            r.post(url, data=data, verify=False)
-            r.get("https://www.cox.com/internet/mydatausage.cox")
+            nonceVal=r.get(AJAX_URL + ON_SUCCESS_URL).text
+            oktasession=r.post(BASE_URL + "/api/v1/authn", data=json.dumps(data), headers=headers, verify=False)
+            sessionToken = oktasession.json()['sessionToken']
+            url= ISSUER + '/v1/authorize?client_id=' + CLIENT_ID + '&nonce=' + nonceVal + '&redirect_uri=' + REDIRECT_URI + '&response_mode=query&response_type=code&sessionToken=' + sessionToken + '&state=https%253A%252F%252Fwww.cox.com%252Fwebapi%252Fcdncache%252Fcookieset%253Fresource%253Dhttps%253A%252F%252Fwww.cox.com%252Fresaccount%252Fhome.cox&scope=' + SCOPE
+            oktasignin=r.get(url,allow_redirects=True, verify=False)
+            r.get("https://www.cox.com/internet/mydatausage.cox", verify=False)
             datausage = r.get("https://www.cox.com/internet/ajaxDataUsageJSON.ajax", verify=False)
             datausagejson = datausage.json()
             #date that cox last updated account usage
