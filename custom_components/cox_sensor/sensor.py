@@ -7,7 +7,7 @@ from homeassistant.util import Throttle
 import requests
 import json
 
-__version_ = '0.1.1'
+__version_ = '0.1.2'
 
 REQUIREMENTS = ['requests']
 
@@ -22,7 +22,7 @@ REDIRECT_URI = "https://"+ HOST_NAME +"/authres/code" #okta-login.js
 AJAX_URL = "https://"+ HOST_NAME +"/authres/getNonce?onsuccess=" #okta-login.js
 BASE_URL = 'https://cci-res.okta.com/' #okta-login.js
 CLIENT_ID = '0oa1iranfsovqR6MG0h8' #okta-login.js
-ISSUER = 'https://cci-res.okta.com/oauth2/aus1iraniwjGQcoad0h8' #okta-login.js
+ISSUER = 'https://cci-res.okta.com/oauth2/aus1jbzlxq0hRR6jG0h8' #okta-login.js
 ON_SUCCESS_URL = "https%3A%2F%2Fwww.cox.com%2Fresaccount%2Fhome.html" #okta-login.js
 onSuccessUrl = ON_SUCCESS_URL
 nonceURL="https://www.cox.com/authres/getNonce?onsuccess=https%3A%2F%2Fwww.cox.com%2Fresimyaccount%2Fhome.html"
