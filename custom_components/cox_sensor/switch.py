@@ -112,25 +112,37 @@ class CoxSwitch(SwitchEntity):
         if self._nfFunction in ('reboot'):
             try:
                 data = {
-                "username": self._username,
-                "password": self._password,
-                "options": {
-                    "multiOptionalFactorEnroll": False,
-                    "warnBeforePasswordExpired": False
-                }
+                    "username": self._username,
+                    "password": self._password,
+                    "options": {
+                        "multiOptionalFactorEnroll": False,
+                        "warnBeforePasswordExpired": False
+                    }
                 }
                 headers = {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 }
                 r = requests.Session()
+                cookies = requests.utils.cookiejar_from_dict(requests.utils.dict_from_cookiejar(r.cookies))
                 nonceVal=r.get(AJAX_URL + ON_SUCCESS_URL).text
-                oktasession=r.post(BASE_URL + "/api/v1/authn", data=json.dumps(data), headers=headers, verify=False)
+                oktasession=r.post(BASE_URL + "/api/v1/authn", data=json.dumps(data), headers=headers, verify=False,cookies=cookies)
                 sessionToken=oktasession.json()['sessionToken']
                 url= ISSUER + '/v1/authorize?client_id=' + CLIENT_ID + '&nonce=' + nonceVal + '&redirect_uri=' + REDIRECT_URI + '&response_mode=query&response_type=code&sessionToken=' + sessionToken + '&state=https%253A%252F%252Fwww.cox.com%252Fwebapi%252Fcdncache%252Fcookieset%253Fresource%253Dhttps%253A%252F%252Fwww.cox.com%252Fresaccount%252Fhome.cox&scope=' + SCOPE
-                oktasignin=r.get(url,allow_redirects=True, verify=False)
-                r.get("https://www.cox.com/resaccount/refresh-modem.cox")
-                r.get("https://www.cox.com/resaccount/refresh-modem.cox/ajaxModemReset.ajax?option=hit", verify=False)
+                r.get(url,allow_redirects=True, verify=False,cookies=cookies)
+                resetlanding = r.get("https://www.cox.com/resaccount/equipment.html?serviceName=internet", verify=False,cookies=cookies)
+                resetlanding = html.fromstring(resetlanding.text)
+                resetlandingmac = resetlanding.xpath("//span[@class='serial-number']/text()", smart_strings=False)[1].replace("MAC: ","")
+                resetmac = r.get("https://www.cox.com/resaccount/support/internet-device-reset-landing.html?macAddress=" + resetlandingmac, verify=False,cookies=cookies)
+                resetmac = html.fromstring(resetmac.text)
+                csrf = resetmac.xpath("//input[@name='_csrf']/@value", smart_strings=False)[0]
+                data = {
+                    'macAddress': resetlandingmac,
+                    'serviceName': "internet",
+                    '_csrf': csrf,
+                    'submit': "Begin reset"
+                }
+                r.post("https://www.cox.com/resaccount/support/internet-device-reset-landing.html",data=data, verify=False,cookies=cookies)
             except Exception as err:
                 _LOGGER.debug(oktasession.text)
                 _LOGGER.error(err)

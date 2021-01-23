@@ -7,7 +7,7 @@ from homeassistant.util import Throttle
 import requests
 import json
 
-__version_ = '0.1.2'
+__version_ = '0.1.3'
 
 REQUIREMENTS = ['requests']
 
@@ -68,7 +68,7 @@ class cox_sensor(Entity):
             oktasession=r.post(BASE_URL + "/api/v1/authn", data=json.dumps(data), headers=headers, verify=False)
             sessionToken = oktasession.json()['sessionToken']
             url= ISSUER + '/v1/authorize?client_id=' + CLIENT_ID + '&nonce=' + nonceVal + '&redirect_uri=' + REDIRECT_URI + '&response_mode=query&response_type=code&sessionToken=' + sessionToken + '&state=https%253A%252F%252Fwww.cox.com%252Fwebapi%252Fcdncache%252Fcookieset%253Fresource%253Dhttps%253A%252F%252Fwww.cox.com%252Fresaccount%252Fhome.cox&scope=' + SCOPE
-            oktasignin=r.get(url,allow_redirects=True, verify=False)
+            r.get(url,allow_redirects=True, verify=False)
             r.get("https://www.cox.com/internet/mydatausage.cox", verify=False)
             datausage = r.get("https://www.cox.com/internet/ajaxDataUsageJSON.ajax", verify=False)
             datausagejson = datausage.json()
