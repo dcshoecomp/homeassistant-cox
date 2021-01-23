@@ -6,7 +6,7 @@ Contains a sensor and a switch. The sensor returns relevant information about co
 
 Version | Changes
 :--- | :---
-v0.1.3 | Updated reboot switch
+v0.1.3 | Fixed reboot switch
 <strike>v0.1.2</strike> | Updated Login IssuerID
 <strike>v0.1.1</strike> | Fix for new okta auth v0.1.1, working modem reboot switch v0.1.1
 <strike>v0.1.0</strike> | No changes to sensor v0.0.6, addition of modem reboot switch v0.0.1
