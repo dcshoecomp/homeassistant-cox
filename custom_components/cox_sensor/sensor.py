@@ -84,13 +84,16 @@ class cox_sensor(Entity):
 
             #Total Data Used in GB example: 500 GB
             if self._getattribute=="data_used":
-                _state = datausagejson['modemDetails'][0]['dataUsed']['totalDataUsed'].replace("&#160;"," ")
+                _state = datausagejson['modemDetails'][0]['dataUsed']['totalDataUsed'].replace("&#160;GB","")
+                _units = 'GB'
             #remaining days in service plan
             if self._getattribute=="remaining_days":
                 _state = abs((datetime.today() - serviceend).days)
+                _units = 'days'
             #Total Percent Used in % example: 50
             if self._getattribute=="percentage_used":
                 _state = datausagejson['modemDetails'][0]['dataUsed']['renderPercentage']
+                _units = '%'
             if self._getattribute=="expected_usage":
                 #serviceend = datetime.strptime('8/25/19', '%m/%d/%y') #testing
                 #lastupdatedbycox = datetime.strptime('08/02/19', '%m/%d/%y') #testing
@@ -100,12 +103,14 @@ class cox_sensor(Entity):
                     totaldays = (serviceend-serviceend.replace(month=serviceend.month-1)).days
                 _state = round((100/totaldays)*float(totaldays-((serviceend - lastupdatedbycox).days)), 2)
                 #_state = round((100/float(13))*float(totaldays-((serviceend - lastupdatedbycox).days)), 2) #testing
+                _units = 'GB'
             self._state = _state
             self._attributes = {}
             self._attributes['last_update'] = lastupdatedbycox.strftime('%m/%d/%y')
             self._attributes['data_plan'] = dataplan
             self._attributes['service_end'] = serviceend.strftime('%m/%d/%y')
             self._attributes['service']= services
+            self._attributes['unit_of_measurement'] = _units
 
         except Exception as err:
             _LOGGER.error(err)
