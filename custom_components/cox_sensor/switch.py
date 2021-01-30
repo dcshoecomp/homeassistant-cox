@@ -10,7 +10,7 @@ from homeassistant.const import (
     )
 import homeassistant.helpers.config_validation as cv
 
-VERSION = '0.1.2'
+VERSION = '0.1.4'
 REQUIREMENTS = ['requests']
 _LOGGER = logging.getLogger(__name__)
 
