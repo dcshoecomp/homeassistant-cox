@@ -4,6 +4,6 @@
     "documentation": "https://github.com/dcshoecomp/homeassistant-cox",
     "dependencies": [],
     "codeowners": [],
-    "requirements": ["requests"]
+    "requirements": ["requests","lxml"]
   }
   

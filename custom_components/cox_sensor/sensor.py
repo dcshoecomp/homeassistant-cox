@@ -1,15 +1,16 @@
-import logging
-from datetime import datetime
-from datetime import timedelta
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.util import Throttle
+import logging
+from datetime import datetime
+from datetime import timedelta
 import requests
 import json
+from lxml import html
 
-__version_ = '0.1.3'
+__version_ = '0.1.4'
 
-REQUIREMENTS = ['requests']
+REQUIREMENTS = ['requests','lxml']
 
 CONF_USERNAME="username"
 CONF_PASSWORD="password"
@@ -70,21 +71,34 @@ class cox_sensor(Entity):
             url= ISSUER + '/v1/authorize?client_id=' + CLIENT_ID + '&nonce=' + nonceVal + '&redirect_uri=' + REDIRECT_URI + '&response_mode=query&response_type=code&sessionToken=' + sessionToken + '&state=https%253A%252F%252Fwww.cox.com%252Fwebapi%252Fcdncache%252Fcookieset%253Fresource%253Dhttps%253A%252F%252Fwww.cox.com%252Fresaccount%252Fhome.cox&scope=' + SCOPE
             r.get(url,allow_redirects=True, verify=False)
             r.get("https://www.cox.com/internet/mydatausage.cox", verify=False)
-            datausage = r.get("https://www.cox.com/internet/ajaxDataUsageJSON.ajax", verify=False)
-            datausagejson = datausage.json()
+            datausage = r.get("https://www.cox.com/internettools/data-usage.html", verify=False)
+            tree = html.fromstring(datausage.text)
+            datatree = tree.xpath("//div[@class='data-usage-cards']/@data-usage-url")
+            datausagejson = json.loads(datatree[0])
             #date that cox last updated account usage
-            lastupdatedbycox = datetime.strptime(datausagejson['modemDetails'][0]['lastUpdatedDate'], '%m/%d/%y')
+            lastupdatedbycox = datetime.strptime(datausagejson['modemDetails'][0]['usageDate'], 'Usage as of %B %d').replace(year=datetime.now().year)
             #Total Data amount to be used example: 1024 GB
-            dataplan = datausagejson['modemDetails'][0]['dataPlan'].replace("&#160;"," ")
+            dataplan = datausagejson['modemDetails'][0]['dataPlan']
             #Current Plan example: Cox High Speed Internet - Preferred150 Package
-            services = datausagejson['modemDetails'][0]['services'].replace("&#160;"," ")
+            services = datausagejson['modemDetails'][0]['service']
             #service_end attribute, returns month/day/year 
-            serviceperiod = datausagejson['modemDetails'][0]['servicePeriod'].split('-')
-            serviceend = datetime.strptime(serviceperiod[1], '%m/%d/%y')
+            serviceperiod = datausagejson['modemDetails'][0]['usageCycle'].split(' - ')
+            serviceend = datetime.strptime(serviceperiod[1], '%B %d')
+            servicebegin = datetime.strptime(serviceperiod[0], '%B %d')
+            if serviceend.month == 1 and servicebegin.month ==12:
+                if serviceend.month == datetime.now().month:
+                    servicebegin = servicebegin.replace(year=datetime.now().year-1)
+                    serviceend = serviceend.replace(year=datetime.now().year)
+                else:
+                    servicebegin = servicebegin.replace(year=datetime.now().year)
+                    serviceend = serviceend.replace(year=datetime.now().year+1)
+            else:
+                servicebegin = servicebegin.replace(year=datetime.now().year)
+                serviceend = serviceend.replace(year=datetime.now().year)
 
             #Total Data Used in GB example: 500 GB
             if self._getattribute=="data_used":
-                _state = datausagejson['modemDetails'][0]['dataUsed']['totalDataUsed'].replace("&#160;GB","")
+                _state = datausagejson['modemDetails'][0]['totalDataUsed'].replace(" GB","")
                 _units = 'GB'
             #remaining days in service plan
             if self._getattribute=="remaining_days":
@@ -92,18 +106,16 @@ class cox_sensor(Entity):
                 _units = 'days'
             #Total Percent Used in % example: 50
             if self._getattribute=="percentage_used":
-                _state = datausagejson['modemDetails'][0]['dataUsed']['renderPercentage']
+                _state = datausagejson['modemDetails'][0]['percentageDataUsed']
                 _units = '%'
+            #After same number of days what should % be at to stay below 100%
             if self._getattribute=="expected_usage":
-                #serviceend = datetime.strptime('8/25/19', '%m/%d/%y') #testing
-                #lastupdatedbycox = datetime.strptime('08/02/19', '%m/%d/%y') #testing
-                if serviceend.month==1:
-                    totaldays = (serviceend-serviceend.replace(month=12,year=serviceend.year-1)).days
-                else:
-                    totaldays = (serviceend-serviceend.replace(month=serviceend.month-1)).days
-                _state = round((100/totaldays)*float(totaldays-((serviceend - lastupdatedbycox).days)), 2)
-                #_state = round((100/float(13))*float(totaldays-((serviceend - lastupdatedbycox).days)), 2) #testing
-                _units = 'GB'
+                #servicebegin = datetime.strptime('1/25/21', '%m/%d/%y') #testing
+                #serviceend = datetime.strptime('2/25/21', '%m/%d/%y') #testing
+                #lastupdatedbycox = datetime.strptime('1/27/21', '%m/%d/%y') #testing
+                totaldays = serviceend - servicebegin
+                _state = round((100/totaldays.days)*float(abs((lastupdatedbycox - servicebegin).days)), 2)
+                _units = '%'
             self._state = _state
             self._attributes = {}
             self._attributes['last_update'] = lastupdatedbycox.strftime('%m/%d/%y')
