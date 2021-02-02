@@ -1,3 +1,7 @@
+
+**Donate if you like my work and this project has brought you joy**
+https://www.paypal.com/donate?hosted_button_id=VNZ5AXWNEU238
+
 # Description
 
 Contains a sensor and a switch. The sensor returns relevant information about cox data usage plan. The switch when toggled on will immediately initiate a modem(or router) reboot, then turn back off. 
