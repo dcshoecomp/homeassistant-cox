@@ -10,7 +10,7 @@ Contains a sensor and a switch. The sensor returns relevant information about co
 
 Version | Changes
 :--- | :---
-v21.03.0 | Fixed cox removing api used. Sensor moved to scraping.
+v21.03.0 | Update to Manifest to include version. Moving to Calendar Versioning.
 <strike>v0.1.4 | Fixed cox removing api used. Sensor moved to scraping.
 <strike>v0.1.3</strike> | Fixed reboot switch, stripped data identifiers from units.
 <strike>v0.1.2</strike> | Updated Login IssuerID
