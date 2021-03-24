@@ -3,6 +3,7 @@ import requests
 import json
 import voluptuous as vol
 from datetime import timedelta
+from lxml import html
 
 from homeassistant.components.switch import SwitchEntity, PLATFORM_SCHEMA
 from homeassistant.const import (
