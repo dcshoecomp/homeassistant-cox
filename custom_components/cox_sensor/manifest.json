@@ -1,6 +1,6 @@
 {
     "domain": "cox_sensor",
-    "version": "21.03.0",
+    "version": "22.02.10",
     "name": "Cox Sensor",
     "documentation": "https://github.com/dcshoecomp/homeassistant-cox",
     "dependencies": [],
