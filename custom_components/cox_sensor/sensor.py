@@ -8,7 +8,7 @@ import requests
 import json
 from lxml import html
 
-__version_ = '21.03.1'
+__version_ = '22.02.10'
 
 REQUIREMENTS = ['requests','lxml']
 
